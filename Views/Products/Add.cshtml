@@ -1,0 +1,60 @@
+@model CapstoneProject.Models.Product
+
+<h2>Add New Product</h2>
+
+@if (ViewBag.ProductInfo != null)
+{
+    <div>
+        <strong>@ViewBag.ProductInfo</strong>
+    </div>
+}
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div style="color: red;">
+        <strong>@ViewBag.ErrorMessage</strong>
+    </div>
+}
+
+<form asp-action="Add" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PurchasePrice"></label>
+        <input asp-for="PurchasePrice" class="form-control" />
+        <span asp-validation-for="PurchasePrice" class="text-danger"></span>        
+    </div>
+    <div class="form-group">
+        <label asp-for="Price"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="CategoryId"></label>
+        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="QuantityInStock" class="control-label"></label>
+        <input asp-for="QuantityInStock" class="form-control" />
+        <span asp-validation-for="QuantityInStock" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ImageFile" class="control-label">Upload Image</label>
+        <input asp-for="ImageFile" type="file" class="form-control-file">
+        @* <span asp-validation-for="ImageFile" class="text-danger"></span> *@
+    </div>
+   
+    <button type="submit" class="btn btn-success">Save</button>
+</form>

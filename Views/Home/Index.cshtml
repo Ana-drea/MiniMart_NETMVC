@@ -1,0 +1,230 @@
+﻿@using CapstoneProject.ViewModels
+@using Microsoft.AspNetCore.Http.Extensions
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@model ProductCategoryViewModel
+
+@{
+    ViewData["Title"] = "MiniMart - Lightweight online supermarket";
+}
+
+@{
+    int nextPage = Convert.ToInt32(ViewBag.PageNumber) + 1;
+    int prevPage = Convert.ToInt32(ViewBag.PageNumber) - 1;
+}
+
+@{
+    var isInventoryManager = false;
+    // check if current login user has Inventory authority
+    if (SignInManager.IsSignedIn(User))
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+
+        if (currentUser != null)
+        {
+            var claims = await UserManager.GetClaimsAsync(currentUser);
+            if (claims.Any(c => c.Type == "Position" && c.Value == "Inventory"))
+            {
+                isInventoryManager = true;
+            }
+        }
+    }
+    ViewBag.ShowInventoryLink = isInventoryManager;
+}
+
+<div class="tab-class text-center">
+    <div class="row g-4">
+        <div class="col-lg-4 text-start">
+            <h4>Our Products</h4>
+        </div>
+    </div>
+    <div>
+        @{
+            int? selectedCategoryId = ViewBag.SelectedCategoryId;
+        }
+        <a class="btn btn-info" asp-controller="Home" asp-action="Index" asp-route-id="">All</a>
+        @if (Model != null)
+        {
+            if (Model.Categories != null)
+            {
+                @foreach (var category in Model.Categories)
+                {
+                    <a class="btn btn-info @(selectedCategoryId == category.Id ? "active" : "")" asp-controller="Home"
+                        asp-action="Index" asp-route-id="@category.Id">@category.Name</a>
+                }
+            }
+
+        }
+        <form asp-controller="Home" asp-action="Index" method="get">
+            <div class="input-group rounded">
+                <input type="search" name="searchQuery" class="form-control rounded" placeholder="Search"
+                    aria-label="Search" aria-describedby="search-addon" value="@ViewBag.SearchQuery" />
+                <button class="btn btn-primary" type="submit" id="search-addon">
+                    Search
+                </button>
+            </div>
+        </form>
+
+    </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    <div class="tab-content">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>img</th>
+                    <th>
+                        <span>
+                            <span>
+                                <a class="btn btn-light" asp-controller="Home" asp-action="Index"
+                                    asp-route-sortBy="Name" asp-route-sortDirection="Asc"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-pageNumber="@ViewBag.PageNumber" aria-label="Sort name in ascending order">
+                                    <i class="bi bi-chevron-up"></i>
+                                </a>
+                            </span>
+                        </span>
+                        Name
+                        <span>
+                            <span>
+                                <a class="btn btn-light" asp-controller="Home" asp-action="Index"
+                                    asp-route-sortBy="Name" asp-route-sortDirection="Desc"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-pageNumber="@ViewBag.PageNumber" aria-label="Sort name in descending order">
+                                    <i class="bi bi-chevron-down"></i>
+                                </a>
+                            </span>
+                        </span>
+                    </th>
+                    <th>Description</th>
+                    <th>
+                        <span>
+                            <span>
+                                <a class="btn btn-light" asp-controller="Home" asp-action="Index"
+                                    asp-route-sortBy="Price" asp-route-sortDirection="Asc"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-pageNumber="@ViewBag.PageNumber" aria-label="Sort price in ascending order">
+                                    <i class="bi bi-chevron-up"></i>
+                                </a>
+                            </span>
+                        </span>
+                        Price
+                        <span>
+                            <span>
+                                <a class="btn btn-light" asp-controller="Home" asp-action="Index"
+                                    asp-route-sortBy="Price" asp-route-sortDirection="Desc"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-pageNumber="@ViewBag.PageNumber" aria-label="Sort price in descending order">
+                                    <i class="bi bi-chevron-down"></i>
+                                </a>
+                            </span>
+                        </span>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    @if (Model.Products != null)
+                    {
+                        @for (int i = 0; i < Model.Products.Count(); i++)
+                        {
+                            var product = Model.Products.ElementAt(i);
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    {
+                                        <img src="@product.ImageUrl" alt="Product Image" style="width: 50px; height: auto;" />
+                                    }
+                                <td>@product.Name</td>
+                                <td>@product.Description</td>
+                                <td>@Html.DisplayFor(modelItem => product.Price)</td>
+                                <td>
+                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@product.Id"
+                                        class="btn btn-info">Details</a>
+                                        @if (Model.CartProductIds != null && !isInventoryManager)
+                                        {
+                                            @if (Model.CartProductIds.Contains(product.Id))
+                                            {
+                                            <button class="btn btn-secondary" disabled>Added</button>
+                                            }
+                                            else if (product.QuantityInStock == 0)
+                                            {
+                                            <button class="btn btn-secondary" disabled>Sold Out</button>
+                                            }
+                                            else
+                                            {
+                                            <button id="addToCart-@product.Id" class="btn btn-success" onclick="addToCart(@product.Id)">
+                                                Add to
+                                                Cart
+                                            </button>
+                                            }
+                                        }
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+        @if (Model != null)
+        {
+            @if (Model.Products != null)
+            {
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        @if (prevPage >= 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-controller="Home" asp-action="Index"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-sortBy="@ViewBag.SortBy"
+                                    asp-route-sortDirection="@ViewBag.SortDirection" asp-route-pageSize="@ViewBag.PageSize"
+                                    asp-route-pageNumber="@prevPage">
+                                    Previous
+                                </a>
+                            </li>
+                        }
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Convert.ToInt32(ViewBag.PageNumber) ? "active" : "")">
+                                <a class="page-link" asp-controller="Home" asp-action="Index"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-sortBy="@ViewBag.SortBy"
+                                    asp-route-sortDirection="@ViewBag.SortDirection" asp-route-pageSize="@ViewBag.PageSize"
+                                    asp-route-pageNumber="@i">@i</a>
+                            </li>
+                        }
+                        @if (nextPage <= ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-controller="Home" asp-action="Index"
+                                    asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-sortBy="@ViewBag.SortBy"
+                                    asp-route-sortDirection="@ViewBag.SortDirection" asp-route-pageSize="@ViewBag.PageSize"
+                                    asp-route-pageNumber="@nextPage">
+                                    Next
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
+
+<script>
+    function addToCart(productId) {
+        var returnUrl = window.location.href;
+        var addToCartUrl = `/Cart/AddToCart?id=${productId}&returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = addToCartUrl;
+    }
+</script>

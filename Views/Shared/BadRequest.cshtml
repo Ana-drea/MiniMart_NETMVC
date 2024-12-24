@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Bad Request";
+}
+
+<div class="container text-center">
+    <h1 class="display-4 text-danger">Bad Request</h1>
+    <p class="lead">There was an issue with your request. Please check the information provided and try again.</p>
+
+    @if (ViewData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mt-4">
+            <strong>Error:</strong> @ViewData["ErrorMessage"]
+        </div>
+    }
+</div>

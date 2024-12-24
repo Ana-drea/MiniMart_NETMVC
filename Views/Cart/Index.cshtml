@@ -1,0 +1,131 @@
+@model CapstoneProject.ViewModels.CartViewModel
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="tab-class text-center">
+    <div class="row g-4">
+        <div class="col-lg-4 text-start">
+            <h4>Products in Your Cart</h4>
+        </div>
+    </div>
+    <div>
+        @Html.AntiForgeryToken()
+    </div>
+    <div class="tab-content">
+        @if (Model.Products != null && Model.Products.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Products.Count(); i++)
+                    {
+                        var product = Model.Products.ElementAt(i);
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@product.Name</td>
+                            <td>@product.Description</td>
+                            <td>@Html.DisplayFor(modelItem => product.Price)</td>
+                            <td>
+                                <!-- 减少数量按钮 -->
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="updateQuantity(@product.Id, -1)" aria-label="Decrement product quantity">
+                                    -
+                                </button>
+
+                                <!-- 显示数量 -->
+                                <span id="quantity-@product.Id">@product.QuantityInCart</span>
+
+                                <!-- 增加数量按钮 -->
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="updateQuantity(@product.Id, 1)" aria-label="Increment product quantity">
+                                    +
+                                </button>
+                            </td>
+                            @{
+                                decimal subtotalPrice = (decimal)(product.Price * product.QuantityInCart);
+                            }
+                            <td id="subtotal-@product.Id">@subtotalPrice.ToString("F2")</td>
+                            <td>
+                                <a class="btn btn-primary" asp-controller="Cart" asp-action="Remove" asp-route-id="@product.Id"
+                                    onclick="return confirm('Are you sure you want to remove this item from the cart?');">Remove</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <h3>Total Amount: <span id="totalAmount">@Model.TotalAmount.ToString("F2")</span></h3>
+            <h4>Total Quantity: <span id="totalQuantity">@Model.TotalQuantity</span></h4>
+
+            <div>
+                <a class="btn btn-primary" asp-controller="Cart" asp-action="Checkout">Proceed to Checkout</a>
+            </div>
+        }
+        else
+        {
+            <h3>Your cart is empty.</h3>
+        }
+    </div>
+</div>
+
+<script>
+    function updateQuantity(productId, change) {
+
+        var quantityElement = document.getElementById("quantity-" + productId);
+        var currentQuantity = parseInt(quantityElement.innerText);
+
+        var newQuantity = currentQuantity + change;
+
+        if (newQuantity < 1) {
+            return;
+        }
+
+        fetch(`/Cart/UpdateQuantity`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: newQuantity
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // 检查是否有错误信息
+                    return response.json().then(data => {
+                        if (data.error) {
+                            alert(data.error);  // 显示库存不足的提示信息
+                        }
+                        throw new Error(data.error || 'Failed to update quantity');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                quantityElement.innerText = newQuantity;
+                document.getElementById("subtotal-" + productId).innerText = data.subtotal.toFixed(2);
+                document.getElementById("totalAmount").innerText = data.totalAmount.toFixed(2);
+                document.getElementById("totalQuantity").innerText = data.totalQuantity;
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+            });
+    }
+</script>

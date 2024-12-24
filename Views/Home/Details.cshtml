@@ -1,0 +1,127 @@
+﻿@using CapstoneProject.ViewModels
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@model ProductDetailsViewModel
+
+@{
+    ViewData["Title"] = "MiniMart - Lightweight online supermarket";
+}
+
+@{
+    var isInventoryManager = false;
+    // check if current login user has Inventory authority
+    if (SignInManager.IsSignedIn(User))
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+
+        if (currentUser != null)
+        {
+            var claims = await UserManager.GetClaimsAsync(currentUser);
+            if (claims.Any(c => c.Type == "Position" && c.Value == "Inventory"))
+            {
+                isInventoryManager = true;
+            }
+        }
+    }
+    ViewBag.ShowInventoryLink = isInventoryManager;
+}
+
+<div class="tab-class text-center">
+    <div class="row g-4">
+        <div class="col-lg-4 text-start">
+            <h4>Product Details</h4>
+        </div>
+    </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    <div class="tab-content">
+        <div>
+            <hr />
+            <dl class="row">
+                <!--
+                            <dt class="col-sm-2">
+                                Id
+                            </dt>
+                            <dd class="col-sm-10">
+                @Model.Product?.Id
+                            </dd>
+                        -->
+                <!-- Add image demonstration -->
+                <dt class="col-sm-2">
+                </dt>
+                <dd class="col-sm-10">
+                    @if (!string.IsNullOrEmpty(Model.Product?.ImageUrl))
+                    {
+                        <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" class="img-thumbnail" style="max-width: 400px; max-height: 400px;" />
+                    }
+                    else
+                    {
+                        <span>No image available</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-2">
+                    Name
+                </dt>
+                <dd class="col-sm-10">
+                    @Model.Product?.Name
+                </dd>
+
+                <dt class="col-sm-2">
+                    Description
+                </dt>
+                <dd class="col-sm-10">
+                    @Model.Product?.Description
+                </dd>
+
+                <dt class="col-sm-2">
+                    Price
+                </dt>
+                <dd class="col-sm-10">
+                    @if (Model.Product != null)
+                    {
+                        @Html.DisplayFor(modelItem => Model.Product.Price)
+                    }
+                    else
+                    {
+                        <span>Price not available</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <a class="btn btn-primary" href="javascript:void(0);" onclick="window.history.back();">Back to Products</a>
+    @if (!isInventoryManager)
+    {
+        @if (Model.IsInCart)
+        {
+            <button class="btn btn-secondary" disabled>Added</button>
+        }
+        else if (Model.Product?.QuantityInStock == 0)
+        {
+            <button class="btn btn-secondary" disabled>Sold Out</button>
+        }
+        else
+        {
+            <button id="addToCart-@Model.Product?.Id" class="btn btn-success" onclick="addToCart(@Model.Product?.Id)">Add to Cart</button>
+
+        }
+    }
+
+</div>
+
+
+<script>
+    function addToCart(productId) {
+        var returnUrl = window.location.href;
+        var addToCartUrl = `/Cart/AddToCart?id=${productId}&returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = addToCartUrl;
+    }
+</script>

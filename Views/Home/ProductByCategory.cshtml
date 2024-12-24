@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "MiniMart - Lightweight online supermarket";
+}
+
+<div class="tab-class text-center">
+    <div class="row g-4">
+        <div class="col-lg-4 text-start">
+            <h1>Our Products</h1>
+        </div>
+    </div>
+    <div class="tab-content">
+        @if (Model != null && Model.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count(); i++)
+                    {
+                        var product = Model.ElementAt(i);
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@product.Name</td>
+                            <td>@product.Description</td>
+                            <td>@product.Price</td>
+                            <td>
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@product.Id"
+                                    class="btn btn-info">Details</a>
+                                <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@product.Id"
+                                    class="btn btn-success">Add to Cart</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    <a class="btn btn-primary" asp-controller="home" asp-action="Index">View Categories</a>
+</div>

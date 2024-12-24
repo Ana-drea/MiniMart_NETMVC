@@ -1,0 +1,36 @@
+@model IEnumerable<CapstoneProject.Models.OrderHistory>
+
+<h2>All Customer Orders</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer Email</th>
+            <th>Order Date</th>
+            <th>Items</th>
+            <th>Total Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            var totalAmount = order.OrderItems.Sum(item => item.UnitPrice * item.Quantity);
+
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.User?.Email</td> 
+                <td>@order.OrderDate</td>
+                <td>
+                    <ul>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <li>@item.Product?.Name - Quantity: @item.Quantity</li>
+                        }
+                    </ul>
+                </td>
+                <td>@totalAmount.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,82 @@
+# Build directories
+bin/
+obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# Auto-generated files
+*.vspscc
+*.vssscc
+
+# Logs
+*.log
+
+# Visual Studio Code files
+.vscode/
+
+# Visual Studio directory
+.vs/
+
+# DotNet specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# NCrunch
+*.ncrunch*
+NCrunchTemp_*
+
+# DotNet User Secrets
+secrets.json
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code directories
+.vscode/
+.history/
+
+# Node.js files
+node_modules/
+
+# npm-debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# JetBrains Rider
+.idea/
+
+# Coverage results
+coverage/
+
+# Paket
+paket-files/
+
+# NuGet packages
+*.nupkg
+
+# Custom
+GitOperation.md
+
+# Ignore images folder
+# wwwroot/images/

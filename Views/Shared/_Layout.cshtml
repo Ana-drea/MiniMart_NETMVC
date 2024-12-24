@@ -1,0 +1,212 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var showInventoryLink = false;
+
+    // check if current login user has Inventory authority
+    if (SignInManager.IsSignedIn(User))
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+
+        if (currentUser != null)
+        {
+            var claims = await UserManager.GetClaimsAsync(currentUser);
+            if (claims.Any(c => c.Type == "Position" && c.Value == "Inventory"))
+            {
+                showInventoryLink = true;
+            }
+        }
+    }
+    ViewBag.ShowInventoryLink = showInventoryLink;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MiniMart</title>
+
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+    <style>
+        .font-size-controls {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .font-size-controls button {
+            font-size: 1rem;
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .font-size-controls button:hover {
+            background-color: #e2e6ea;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- Navbar start -->
+    <div class="container-fluid fixed-top">
+        <div class="container px-0">
+            <nav class="navbar navbar-light bg-white navbar-expand-xl">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" asp-route-id="">
+                    <h1 class="text-primary display-6">MiniMart</h1>
+                </a>
+                <!-- <partial name="_LoginPartial" /> -->
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto">
+                        <a class="nav-item nav-link @(currentAction == "Index" && currentController == "Home" ? "active" : "")"
+                           asp-area="" asp-controller="Home" asp-action="Index" asp-route-id="">Home</a>
+
+                        @if (showInventoryLink)
+                        {
+                            <a class="nav-item nav-link @(currentAction == "Index" && currentController == "Categories" ? "active" : "")"
+                               asp-area="" asp-controller="Categories" asp-action="Index">Inventory</a>
+
+                            <a class="nav-item nav-link @(currentAction == "AdminOrders" && currentController == "Orders" ? "active" : "")"
+                                asp-area="" asp-controller="Orders" asp-action="AdminOrders">View All Orders</a>
+                        }
+                        else
+                        {
+                            <a class="nav-item nav-link @(currentAction == "Index" && currentController == "Cart" ? "active" : "")"
+                                asp-area="" asp-controller="Cart" asp-action="Index" asp-route-id="">Cart</a>
+
+                            <a class="nav-item nav-link @(currentAction == "Index" && currentController == "Orders" ? "active" : "")"
+                                asp-area="" asp-controller="Orders" asp-action="Index" asp-route-id="">Orders</a>
+                        }
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                  asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                <button id="logout" type="submit"
+                                        class="nav-link btn btn-link text-dark border-0">
+                                    Logout
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="nav-link text-dark" id="register" asp-area="Identity"
+                               asp-page="/Account/Register">Register</a>
+                            <a class="nav-link text-dark" id="login" asp-area="Identity"
+                               asp-page="/Account/Login">Login</a>
+                        }
+                        </ul>
+
+                    </div>
+                    <div class="d-flex m-3 me-0">
+                        <!-- <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
+                                data-bs-toggle="modal" data-bs-target="#searchModal">
+                            <i class="fas fa-search text-primary"></i>
+                            -->
+                        </button>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a id="manage" class="my-auto" asp-area="Identity" asp-page="/Account/Manage/Index"
+                               title="Manage">
+                                <i class="fas fa-user fa-2x"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="font-size-controls">
+                            <button onclick="adjustFontSize(1)">A+</button>
+                            <button onclick="adjustFontSize(-1)">A-</button>
+                        </div> 
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+    <!-- RenderBody Start -->
+    <div class="container-fluid py-5" style="margin-top: 0px;">
+        <div class="container py-5">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    <!-- RenderBody End -->
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/easing/easing.min.js"></script>
+    <script src="~/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/lib/lightbox/js/lightbox.min.js"></script>
+    <script src="~/lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="~/js/main.js"></script>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        //  Record the element ID on click events
+        document.addEventListener('click', function (event) {
+            if (event.target.id) {
+                sessionStorage.setItem('lastFocusedElement', event.target.id);
+            }
+        });
+
+        // Set the focus to the last clicked element when the page loads
+        window.addEventListener('load', function () {
+            const lastFocusedElementId = sessionStorage.getItem('lastFocusedElement');
+            if (lastFocusedElementId) {
+                const element = document.getElementById(lastFocusedElementId);
+                if (element) {
+                    element.focus();
+                }
+            }
+        });
+
+    </script>
+    <script>
+    let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
+
+    document.documentElement.style.fontSize = currentFontSize + 'px';
+
+    function adjustFontSize(change) {
+        currentFontSize += change;
+        document.documentElement.style.fontSize = currentFontSize + 'px';
+        localStorage.setItem('fontSize', currentFontSize); 
+    }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

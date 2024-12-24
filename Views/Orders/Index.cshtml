@@ -1,0 +1,71 @@
+@model OrderHistory
+
+<h2>Order Confirmation</h2>
+
+<!-- 历史订单选择下拉列表 -->
+<form method="post">
+    <div>
+        <label for="orderHistory">Select an Order:</label>
+        <select id="orderHistory" name="orderHistory" class="form-control">
+            <option value="">--Select Order--</option>
+            @foreach (var item in ViewBag.OrderNames as List<SelectListItem> ?? new List<SelectListItem>())
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">View Order</button>
+</form>
+
+@if (Model == null || Model.OrderItems == null || !Model.OrderItems.Any())
+{
+    <div>
+        <h4>No matching order found</h4>
+        <p>We could not locate your order information. Please check your order status or try again later. If you have any questions, please contact our support team.</p>
+    </div>
+}
+else
+{
+    <div>
+        <h4>Thank you for your order!</h4>
+        <p>Your order has been successfully placed. Here are the details:</p>
+    </div>
+
+    <hr />
+
+    <div>
+        <h5>Order Summary</h5>
+        <p><strong>Order Number:</strong> @Model.OrderNumber</p>
+        <p><strong>Order Date:</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        <p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>
+    </div>
+
+    <hr />
+
+    <h5>Order Items</h5>
+    <table class="table" id="orderItemsTable">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>@item.UnitPrice.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.TotalPrice.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr />
+
+    <p>If you have any questions about your order, feel free to contact our support team.</p>
+}

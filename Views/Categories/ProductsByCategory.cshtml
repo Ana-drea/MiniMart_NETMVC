@@ -1,0 +1,33 @@
+@model IEnumerable<CapstoneProject.Models.Product>
+
+<h2>Products in @ViewBag.CategoryName</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Purchase Price</th>
+            <th>Selling Price</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.PurchasePrice</td>
+                <td>@product.Price</td>
+                <td>@product.Category?.Name</td>
+                <td>
+                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-primary">Edit</a>
+                    <a asp-controller="Products" asp-action="Delete" asp-route-id="@product.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
